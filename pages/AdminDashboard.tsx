@@ -68,6 +68,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [jsonInput, setJsonInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [visits, setVisits] = useState<VisitLog[]>([]);
 
   // --- Supabase Data Handlers ---
 
@@ -190,6 +191,33 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     }
   }, [selectedQuizId, fetchQuizzes, fetchAttempts]);
 
+  const fetchVisits = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('visits')
+      .select('*')
+      .order('visitedAt', { ascending: false }) // Show newest visits first
+      .limit(100); // Limit to last 100 for dashboard sanity
+  
+    if (error) {
+      console.error('Error fetching visits:', error);
+    } else {
+      setVisits(data as VisitLog[]);
+    }
+  }, []);
+
+// ... Update your initial useEffect to call fetchVisits ...
+useEffect(() => {
+  const loadData = async () => {
+    setLoading(true);
+    await fetchQuizzes();
+    await fetchAttempts();
+    await fetchVisits(); // <--- NEW CALL
+    setLoading(false);
+  };
+  loadData();
+}, [fetchQuizzes, fetchAttempts, fetchVisits]); // <--- NEW DEPENDENCY
+
+
   // --- End Supabase Data Handlers ---
 
   const filteredAttempts = attempts.filter(a => a.quizId === selectedQuizId);
@@ -225,6 +253,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
           Logout
         </button>
       </div>
+      
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Quiz Management */}
@@ -334,6 +363,50 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                 )}
             </div>
         </div>
+       
+        {/* 🌟 New Traffic & Bot Log Section 🌟 */}
+<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+    <h3 className="text-xl font-semibold mb-4 text-primary-500">
+        Site Traffic Log (Last 100 Visits)
+    </h3>
+    <div className="max-h-64 overflow-y-auto">
+        {visits.length > 0 ? (
+            <table className="w-full text-left text-sm">
+                <thead>
+                    <tr className="border-b dark:border-gray-600">
+                        <th className="p-2">Time</th>
+                        <th className="p-2">IP</th>
+                        <th className="p-2">User</th>
+                        <th className="p-2">Device</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {visits.map((log) => (
+                        <tr key={log.id} className="border-b dark:border-gray-700">
+                            <td className="p-2 text-xs">
+                                {new Date(log.visitedAt).toLocaleTimeString()}
+                            </td>
+                            <td className="p-2">{log.ipAddress}</td>
+                            <td className="p-2">
+                                {log.userName || (
+                                    <span className="text-gray-400">Guest</span>
+                                )}
+                            </td>
+                            <td className="p-2">{log.device}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        ) : (
+            <p className="text-center text-gray-500">No recent traffic logs available.</p>
+        )}
     </div>
+</div>
+        
+    </div>
+    
+
+
+
   );
 };
