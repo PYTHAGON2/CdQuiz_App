@@ -210,6 +210,9 @@ export const QuizPage: React.FC<QuizPageProps> = ({ quiz, user, onFinish }) => {
             handleOfflineAttempt(attemptPayload);
         }
 
+        
+        
+
         // Clean up local quiz state
         localStorage.removeItem(`quiz-state-${user.name}-${quiz.id}`);
 

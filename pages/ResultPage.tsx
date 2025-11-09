@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { QuizAttempt, Quiz } from '../types';
 import { createClient } from '@supabase/supabase-js';
 
+//the attempt object should be available to this page
 // ✅ Initialize Supabase client (Client should be initialized consistently)
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
@@ -50,6 +51,7 @@ export const ResultPage: React.FC<ResultPageProps> = ({
 
   const quizToRestart = quiz; // CRITICAL FIX: Use the passed prop
 
+
   const handleDownloadImage = () => {
     if (resultCardRef.current) {
       // @ts-ignore
@@ -61,6 +63,8 @@ export const ResultPage: React.FC<ResultPageProps> = ({
       });
     }
   };
+
+
 
   const handleDownloadText = () => {
     const content = `
