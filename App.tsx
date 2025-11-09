@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { HomePage } from './pages/HomePage';
 import { QuizPage } from './pages/QuizPage';
@@ -60,6 +59,7 @@ const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [activeQuiz, setActiveQuiz] = useState<Quiz | null>(null);
   const [lastAttempt, setLastAttempt] = useState<QuizAttempt | null>(null);
+  const [lastQuiz, setLastQuiz] = useState<Quiz | null>(null);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
 
   useEffect(() => {
@@ -98,14 +98,16 @@ const App: React.FC = () => {
     setView('quiz');
   }, []);
 
-  const finishQuiz = useCallback((attempt: QuizAttempt) => {
+  const finishQuiz = useCallback((attempt: QuizAttempt, quiz: Quiz) => {
     setLastAttempt(attempt);
+    setLastQuiz(quiz);
     setView('result');
   }, []);
 
   const backToHome = useCallback(() => {
     setActiveQuiz(null);
     setLastAttempt(null);
+    setLastQuiz(null);
     if(user?.name.toLowerCase() === 'admin') {
       setView('admin');
     } else {
@@ -120,8 +122,8 @@ const App: React.FC = () => {
           <QuizPage quiz={activeQuiz} user={user} onFinish={finishQuiz} />
         ) : null;
       case 'result':
-        return lastAttempt && user ? (
-          <ResultPage attempt={lastAttempt} onRestart={startQuiz} onBackToHome={backToHome} />
+        return lastAttempt && lastQuiz ? (
+          <ResultPage attempt={lastAttempt} quiz={lastQuiz} onRestart={startQuiz} onBackToHome={backToHome} />
         ) : null;
       case 'admin':
         return <AdminDashboard onLogout={handleLogout} />;
