@@ -74,7 +74,7 @@ const logVisit = useCallback(async (currentIp: string | null, currentUser: User 
   const fetchQuizzes = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('quizzes').select('*');
+      const { data, error } = await supabase.from('quizzes').select('*').order('createdAt', { ascending: false });
       if (error) throw error;
       if (data) setQuizzes(data);
     } catch (error) {
